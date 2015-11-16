@@ -16,6 +16,7 @@ module.exports = {
     escrowFee: escrowFee,
     updateTokenBalance:updateTokenBalance,
     updateReputationBalance:updateReputationBalance,
+    reputationEvolution: reputationEvolution,
 
     createNetwork: createNetwork,
     createContribution: createContribution,
@@ -81,11 +82,9 @@ function getLastTotalVotedReputation(participants) {
     //(networkId) = fetch evaluations from evaluation db and sum all reputation voted so far (per network)
 }
 function reputationEvolution(lastUserReputation, lastTotalVotedReputation, newTotalVotedReputation, lastTotalAlignedReputation, newTotalAlignedReputation) {
-    var result = 0;
-        //(1 - REPUTATION_FRACTION_STAKE)*(userReputationThen) +
-        //(REPUTATION_FRACTION_STAKE*userReputationThen*totalAlignedReputationNow*totalVotedReputationThen)/
-        //(totalAlignedReputationThen*totalVotedReputationNow)
-    return result;
+    return (1 - REPUTATION_FRACTION_STAKE)*(lastUserReputation) +
+        (REPUTATION_FRACTION_STAKE*lastUserReputation*newTotalAlignedReputation*lastTotalVotedReputation)/
+        (lastTotalAlignedReputation*newTotalVotedReputation)
 }
 // should also get networks.networks
 function getParticipantsList(currentEvaluations){
@@ -97,12 +96,7 @@ function getParticipantsList(currentEvaluations){
     });
     return participants;
 }
-//function getAgentById(id) {
-//    return getItemById(agents, id);
-//}
-//function getContributionById(id) {
-//    return getItemById(contributions, id);
-//}
+
 function getItemById(collection, id) {
     return _.find(collection, function(item) {
         return item.id === id;
@@ -145,20 +139,21 @@ function getAgentsReputationById(agentId) {
 }
 
 function getParticipants(agentId, networkId) {
-     return _.find(db.agents[agentId].networks, function(bal) {
-        return bal.id = networkId;
-    });
+    var agent = getItemById(db.agents, agentId);
+    var network = getItemById(agent.networks, networkId);
+    return network;
 }
 
 function createContribution(agentId) {
-    if (typeof agentId == 'undefined') throw new Error('Agent Id is Missing');
     var instance = factory.createContribution(agentId);
     db.contributions.push(instance);
     return instance;
 }
 
 function createEvaluation(agentId, contributionId, evaluatedValue) {
-    if (!_.find(db.contributions, function(con) { return con.id === contributionId })) throw new Error('Contribution Does Not Exist');
+    var contribution = getItemById(db.contributions, contributionId);
+    //console.log(db.contributions)
+    if (!contribution) throw new Error('Contribution Does Not Exist');
     var instance = factory.createEvaluation(agentId, contributionId, evaluatedValue);
     db.evaluations.push(instance);
     return instance;
@@ -166,7 +161,7 @@ function createEvaluation(agentId, contributionId, evaluatedValue) {
 
 function createNetwork(agentId) {
     var instance = factory.createNetwork(agentId);
-    if (_.find(db.networks, function(net) { return net.id === instance.id}))
+    if (_.find(db.networks, function(net) { return net.agentId === instance.agentId}))
     {
         return new Error('Network Already Exists');
     } else {

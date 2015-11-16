@@ -10,28 +10,28 @@ describe.only('test the protocol functions', function () {
             //expect(protocol.createNetwork(_.last(db.networks).id++).id).to.be.above(0);
             expect(protocol.createNetwork(1).id).to.be.above(0);
             expect(protocol.db.networks.length).to.be.above(0);
-            console.log(protocol.db.networks);
+            //console.log(protocol.db.networks);
         });
-        xit('should fail if network exists', function () {
-            //expect(protocol.createNetwork(1)).to.throw(new Error('Network Already Exists'));
-            //console.log(db.networks);
+        it('should fail if network exists', function () {
+            expect(String(protocol.createNetwork(1))).to.equal('Error: Network Already Exists');
         });
     });
     describe('createContribution', function () {
         it('should create a new contribution', function () {
             expect(protocol.createContribution(1).id).to.be.above(0);
             expect(protocol.db.contributions.length).to.be.above(0);
-            console.log(protocol.db.contributions);
+            //console.log(protocol.db.contributions);
         });
     });
     describe('createEvaluation', function () {
         xit('should throw error if contribution does not exists', function () {
-            expect(protocol.createEvaluation(1,3,4).id).to.throw(Error);
+            //expect(String(protocol.createEvaluation(1,3,4))).to.equal('Error: Contribution Does Not Exists');
+            //expect(protocol.createEvaluation(1,4,4)).to.throw(Error);
         });
         it('should create a new evaluation', function () {
-            expect(protocol.createEvaluation(1,5,4).id).to.be.above(0);
+            expect(protocol.createEvaluation(1,6,4).id).to.be.above(0);
             expect(protocol.db.evaluations.length).to.be.above(0);
-            console.log(protocol.db.evaluations);
+            //console.log(protocol.db.evaluations);
         });
     });
     describe('existingContribution', function () {
@@ -41,32 +41,47 @@ describe.only('test the protocol functions', function () {
         });
     });
     describe('newUser', function () {
-        xit('should throw error if a user exists', function () {
-            expect(protocol.newUser()).to.throw(Error);
-        });
         it('should create a new user', function () {
             expect(protocol.newUser()).to.be.above(0);
             expect(protocol.db.agents.length).to.be.above(0);
-            console.log(protocol.db.agents);
+            //console.log(protocol.db.agents);
+        });
+    });
+    xdescribe('updateReputationBalance', function () {
+        it('should distribute agents reputation in participating networks', function () {
+        });
+    });
+    xdescribe('updateTokenBalance', function () {
+        it('should distribute agents tokens in participating networks', function () {
+        });
+    });
+    xdescribe('escrowFee', function () {
+        it('should charge escrow fee from contributor', function () {
         });
     });
     xdescribe('newContribution', function () {
-        it('should create a new network for agent given being its first contribution', function () {
-            //protocol.newContribution(33);
-            //console.log(contributions);
-            //console.log(networks);
-            //expect(protocol.distribute(1)).to.be.above(0);
-        });
-        it('should create the first evaluation for the creator agent', function () {
-            //expect(protocol.distribute(1)).to.be.above(0);
+       it('should create a new contribution and update reputation balance and escrow fee', function () {
+            console.log(protocol.db.agents);
+            protocol.newContribution(8);
+            console.log(protocol.db.agents);
+            expect(protocol.newContribution(8)).to.be.above(0);
         });
     });
     xdescribe('newEvaluation', function () {
         it('should append a new evaluation of a given agent to the contribution array', function () {
-            //expect(protocol.distribute(1)).to.be.above(0);
         });
-        it('should distribute reputation to contributor agent if consensus', function () {
-            //expect(protocol.distribute(1)).to.be.above(0);
+        it('should distribute reputation to contributor agent if consensus is reached', function () {
+        });
+    });
+    xdescribe('contribute', function () {
+        it('should create a new network for agent given being its first contribution', function () {
+        });
+        it('should create the first evaluation for the creator agent', function () {
+        });
+    });
+    describe('reputationEvolution', function () {
+        it('should calc the new reputation state by checking alignment with past distribution', function () {
+            expect(protocol.reputationEvolution(8,3,4,5,6)).to.be.equal(7.992);
         });
     });
 });
