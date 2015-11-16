@@ -86,7 +86,7 @@ describe.only('test the protocol functions', function () {
             //console.log(protocol.db.agents);
             //console.log(protocol.db.networks);
             protocol.contribute(2, 1);
-            console.log(protocol.db.networks);
+            //console.log(protocol.db.networks);
             expect(protocol.db.networks.length).to.be.equal(2);
         });
     });

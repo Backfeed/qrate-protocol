@@ -47,20 +47,7 @@ function newContribution(agentId) {
 function newEvaluation(contributionId, evaluatorId, evaluatedValue, reputationStake){
     createEvaluation(evaluatorId, contributionId, evaluatedValue);
     // save agents' history to the current contribution evaluations total, per network
-    var contribution = getItemById(db.contributions, contributionId);
-    if (contribution.evaluations.length > 0) {
-        var agent = getItemById(db.agents, evaluatorId);
-        _.each(agent.networks, function(net) {
-            var netStats = getItemById(contribution.networks, net.id) || factory.createNetStatsForContribution(net.id);
-            netStats.totalVotedRep += net.reputationBalance;
-            netStats.votes.push(evaluatedValue);
-            netStats.perVote[evaluatedValue] += 1;
-            netStats.weightedMedian = math.median(netStats.votes);
-            netStats.weightedAverage = math.sum(netStats.votes)/netStats.votes.length;
-            netStats.tokensPaid = 0;
-        })
-    }
-
+    saveEvaluatorStatsForContribution(evaluatorId, contributionId);
     // this updates a new array and NOT the referenced array. should create an update function or update the original array live.
     var evaluators = getParticipantsList(currentEvaluations);
     //var networkIds = _.uniq(_.pluck(evaluators, "id"), true);
@@ -78,6 +65,19 @@ function newEvaluation(contributionId, evaluatorId, evaluatedValue, reputationSt
     var fee = 0; //calc
     //updateTokenBalance(evaluators, delta);
     updateReputationBalance(evaluators, fee);
+}
+function saveEvaluatorStatsForContribution(evaluatorId, contributionId) {
+    var contribution = getItemById(db.contributions, contributionId);
+    var agent = getItemById(db.agents, evaluatorId);
+    _.each(agent.networks, function(net) {
+        var netStats = getItemById(contribution.networks, net.id) || factory.createNetStatsForContribution(net.id);
+        netStats.totalVotedRep += net.reputationBalance;
+        netStats.votes.push(evaluatedValue);
+        netStats.perVote[evaluatedValue] += 1;
+        netStats.weightedMedian = math.median(netStats.votes);
+        netStats.weightedAverage = math.sum(netStats.votes)/netStats.votes.length;
+        netStats.tokensPaid = 0;
+    })
 }
 function getLastTotalVotedReputation(participants) {
     //(networkId) = fetch evaluations from evaluation db and sum all reputation voted so far (per network)
