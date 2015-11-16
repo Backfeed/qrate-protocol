@@ -12,3 +12,4 @@ module.exports = {
 // on consensus make evaluation of network
 // does last netStatus can be dynamic?
 // how to handle distribution if tokens
+// when creating a new contribution inside what network does the reputation stands? networkId = 0 ?? see contribute and getAgentsReputationById

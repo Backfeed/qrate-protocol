@@ -2,7 +2,7 @@
 
 var nextId = (function (initialId) {
     return nextId = initialId || 1;
-})(4);
+})(1);
 
 function HolonFactory(initialId) {
     this.nextId = initialId || 1;

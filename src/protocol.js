@@ -32,6 +32,7 @@ function evaluate(contributionId, evaluatorId, evaluatedValue, reputationStake){
 
 function newUser() {
     var instance = factory.createAgent();
+    instance.networks.push(factory.createNetStatsForAgent(0));
     db.agents.push(instance);
     return instance.id;
 }
@@ -122,23 +123,24 @@ function updateReputationBalance(participants, delta) {
     })
 }
 function contribute(agentId, evaluatedValue) {
-    var contributionId = newContribution(agentId);
+    //var contributionId = newContribution(agentId);
     var reputationStake = getAgentsReputationById(agentId) * REPUTATION_FRACTION_STAKE;
-    newEvaluation(contributionId, agentId, evaluatedValue, reputationStake);
+    //newEvaluation(contributionId, agentId, evaluatedValue, reputationStake);
     // should create a new network for agent given being its first contribution
-    var prevContribution = existingContribution(agentId);
-    if (!prevContribution) {
-        //inside what network does the reputation stands?
-        createNetwork(agentId, 0);
-    }
+    if (!existingContribution(agentId)) createNetwork(agentId);
 }
 
 function getAgentsReputationById(agentId) {
-    //inside what network does the reputation stands?
-    return db.agents[agentId].networks[0].reputationBalance;
+    return getParticipatingNetwork(agentId ,0).reputationBalance;
 }
 
 function getParticipants(agentId, networkId) {
+    var agent = getItemById(db.agents, agentId);
+    var network = getItemById(agent.networks, networkId);
+    return network;
+}
+
+function getParticipatingNetwork(agentId, networkId) {
     var agent = getItemById(db.agents, agentId);
     var network = getItemById(agent.networks, networkId);
     return network;
@@ -152,7 +154,6 @@ function createContribution(agentId) {
 
 function createEvaluation(agentId, contributionId, evaluatedValue) {
     var contribution = getItemById(db.contributions, contributionId);
-    //console.log(db.contributions)
     if (!contribution) throw new Error('Contribution Does Not Exist');
     var instance = factory.createEvaluation(agentId, contributionId, evaluatedValue);
     db.evaluations.push(instance);

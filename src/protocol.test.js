@@ -5,6 +5,17 @@ var protocol = require('./protocol');
 var _ = require('lodash');
 var C = require('./constants');
 describe.only('test the protocol functions', function () {
+    describe('newUser', function () {
+        it('should create a new user', function () {
+            expect(protocol.newUser()).to.be.above(0);
+            expect(protocol.db.agents.length).to.be.equal(1);
+            expect(protocol.db.agents[0].networks.length).to.be.equal(1);
+            expect(protocol.newUser()).to.be.above(1);
+            expect(protocol.db.agents.length).to.be.equal(2);
+            expect(protocol.db.agents[0].networks.length).to.be.equal(1);
+            //console.log(protocol.db.agents);
+        });
+    });
     describe('createNetwork', function () {
         it('should create a new network', function () {
             //expect(protocol.createNetwork(_.last(db.networks).id++).id).to.be.above(0);
@@ -29,7 +40,8 @@ describe.only('test the protocol functions', function () {
             //expect(protocol.createEvaluation(1,4,4)).to.throw(Error);
         });
         it('should create a new evaluation', function () {
-            expect(protocol.createEvaluation(1,6,4).id).to.be.above(0);
+            //console.log(protocol.db.contributions);
+            expect(protocol.createEvaluation(1,5,4).id).to.be.above(0);
             expect(protocol.db.evaluations.length).to.be.above(0);
             //console.log(protocol.db.evaluations);
         });
@@ -38,13 +50,6 @@ describe.only('test the protocol functions', function () {
         it('should check if this is the first contribution of an agent', function () {
             expect(protocol.existingContribution(1)).to.not.be.undefined;
             expect(protocol.existingContribution(0)).to.be.undefined;
-        });
-    });
-    describe('newUser', function () {
-        it('should create a new user', function () {
-            expect(protocol.newUser()).to.be.above(0);
-            expect(protocol.db.agents.length).to.be.above(0);
-            //console.log(protocol.db.agents);
         });
     });
     xdescribe('updateReputationBalance', function () {
@@ -73,10 +78,16 @@ describe.only('test the protocol functions', function () {
         it('should distribute reputation to contributor agent if consensus is reached', function () {
         });
     });
-    xdescribe('contribute', function () {
-        it('should create a new network for agent given being its first contribution', function () {
+    describe('contribute', function () {
+        xit('should create the first evaluation for the creator agent', function () {
         });
-        it('should create the first evaluation for the creator agent', function () {
+        it('should create a new network for agent given being its first contribution', function () {
+            //console.log(protocol.db.contributions);
+            //console.log(protocol.db.agents);
+            //console.log(protocol.db.networks);
+            protocol.contribute(2, 1);
+            console.log(protocol.db.networks);
+            expect(protocol.db.networks.length).to.be.equal(2);
         });
     });
     describe('reputationEvolution', function () {
