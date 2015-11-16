@@ -1,32 +1,28 @@
 {
-  "name": "backfeed-game-protocol",
+  "name": "qrate-protocol",
   "version": "0.0.1",
-  "description": "A Backfeed Protocol for Turn Based Games",
+  "description": "A Backfeed Protocol for QRate",
   "main": "src/index.js",
   "scripts": {
-    "test": "mocha src/index.test.js -w",
+    "test": "mocha src/*.test.js -w",
     "test:single": "mocha src/index.test.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/backfeed/backfeed-game-protocol"
+    "url": "https://github.com/backfeed/qrate-protocol"
   },
   "keywords": [
     "backfeed",
     "protocol"
   ],
-  "author": "Yaniv Keinan",
+  "author": "Backfeed Team",
   "license": "GPL",
   "dependencies": {
-    "lodash": "3.10.1",
-    "ramda": "0.18.0"
+    "mockjs": "*",
+    "lodash": "3.10.1"
   },
   "devDependencies": {
     "chai": "3.4.0",
-    "commitizen": "2.3.0",
-    "cz-conventional-changelog": "1.1.4",
-    "ghooks": "0.3.2",
-    "istanbul": "0.4.0",
     "mocha": "2.3.3"
   }
 }

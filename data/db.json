@@ -1,18 +1,135 @@
 {
-  "data":[
+  "agents":[
     {
       "id": 1,
-      "rep": [
-        1,0.333,0,0.63,0.71,0.34
-      ],
-      "tokens": 54
+      "networks": [
+        {
+          "id": 1,
+          "rep": 1,
+          "token": 33
+        },
+        {
+          "id": 2,
+          "rep": 0,
+          "token": 33
+        }
+      ]
     },
     {
       "id": 2,
-      "rep": [
-        1,1,0,0.71,0.64,0.45
-      ],
-      "tokens": 55
+      "networks": [
+        {
+          "id": 2,
+          "rep": 1,
+          "token": 33
+        },
+        {
+          "id": 1,
+          "rep": 0.577,
+          "token": 33
+        }
+      ]
+    }
+  ],
+  "contributions": [
+    {
+      "id": 1,
+      "agentId": 1,
+      "networkId": 1,
+      "evaluations": [
+        {
+          "agentId": 1,
+          "vote": 1
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "agentId": 1,
+      "networkId": 1,
+      "evaluations": [
+        {
+          "agentId": 1,
+          "vote": 1
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "agentId": 2,
+      "networkId": 2,
+      "evaluations": [
+        {
+          "agentId": 2,
+          "vote": 1
+        },
+        {
+          "agentId": 1,
+          "vote": 1
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "agentId": 1,
+      "networkId": 2,
+      "evaluations": [
+        {
+          "agentId": 1,
+          "vote": 1
+        },
+        {
+          "agentId": 2,
+          "vote": 0
+        }
+      ]
+    }
+  ],
+  "networks": [
+    {
+      "id": 1,
+      "agentId": 1,
+      "contributions": [
+        {
+          "id": 1,
+          "agentId": 1
+        },
+        {
+          "id": 2,
+          "agentId": 1
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "agentId": 2,
+      "contributions": [
+        {
+          "id": 3,
+          "agentId": 2
+        },
+        {
+          "id": 4,
+          "agentId": 2
+        }
+      ]
+    }
+  ],
+  "evaluations": [
+    {
+      "agentId": 1,
+      "contributionId": 1,
+      "vote": 1
+    },
+    {
+      "agentId": 1,
+      "contributionId": 2,
+      "vote": 1
+    },
+    {
+      "agentId": 1,
+      "contributionId": 3,
+      "vote": 1
     }
   ]
 }
