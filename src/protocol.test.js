@@ -1,20 +1,16 @@
 'use strict';
 
-var agents = require('../data/db.json').agents;
-var networks = require('../data/db.json').networks;
-var contributions = require('../data/db.json').contributions;
 var expect = require('chai').expect;
 var protocol = require('./protocol');
 var _ = require('lodash');
 var C = require('./constants');
 describe.only('test the protocol functions', function () {
-    var db = protocol.init();
     describe('createNetwork', function () {
         it('should create a new network', function () {
             //expect(protocol.createNetwork(_.last(db.networks).id++).id).to.be.above(0);
             expect(protocol.createNetwork(1).id).to.be.above(0);
-            expect(db.networks.length).to.be.above(0);
-            console.log(db.networks);
+            expect(protocol.db.networks.length).to.be.above(0);
+            console.log(protocol.db.networks);
         });
         xit('should fail if network exists', function () {
             //expect(protocol.createNetwork(1)).to.throw(new Error('Network Already Exists'));
@@ -24,8 +20,8 @@ describe.only('test the protocol functions', function () {
     describe('createContribution', function () {
         it('should create a new contribution', function () {
             expect(protocol.createContribution(1).id).to.be.above(0);
-            expect(db.contributions.length).to.be.above(0);
-            console.log(db.contributions);
+            expect(protocol.db.contributions.length).to.be.above(0);
+            console.log(protocol.db.contributions);
         });
     });
     describe('createEvaluation', function () {
@@ -34,8 +30,8 @@ describe.only('test the protocol functions', function () {
         });
         it('should create a new evaluation', function () {
             expect(protocol.createEvaluation(1,5,4).id).to.be.above(0);
-            expect(db.evaluations.length).to.be.above(0);
-            console.log(db.evaluations);
+            expect(protocol.db.evaluations.length).to.be.above(0);
+            console.log(protocol.db.evaluations);
         });
     });
     describe('existingContribution', function () {
@@ -50,8 +46,8 @@ describe.only('test the protocol functions', function () {
         });
         it('should create a new user', function () {
             expect(protocol.newUser()).to.be.above(0);
-            expect(db.agents.length).to.be.above(0);
-            console.log(db.agents);
+            expect(protocol.db.agents.length).to.be.above(0);
+            console.log(protocol.db.agents);
         });
     });
     xdescribe('newContribution', function () {

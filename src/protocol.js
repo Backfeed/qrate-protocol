@@ -1,15 +1,10 @@
 'use strict';
 
-var agents = require('../data/db.json').agents;
-var networks = require('../data/db.json').networks;
-var contributions = require('../data/db.json').contributions;
-var evaluations = require('../data/db.json').evaluations;
-
+var db = require('./db').connect();
 var factory = require('./factory');
 var C = require('./constants');
 var _ = require('lodash');
 var math = require('mathjs');
-var mock = require('mockjs');
 
 module.exports = {
     contribute: contribute,
@@ -26,7 +21,7 @@ module.exports = {
     createContribution: createContribution,
     createEvaluation: createEvaluation,
     existingContribution: existingContribution,
-    init: initDB
+    db: db
 };
 
 //in qrate only: reputationStake == REPUTATION_FRACTION_STAKE * evaluatorReputation
@@ -36,7 +31,7 @@ function evaluate(contributionId, evaluatorId, evaluatedValue, reputationStake){
 
 function newUser() {
     var instance = factory.createAgent();
-    agents.push(instance);
+    db.agents.push(instance);
     return instance.id;
 }
 
@@ -50,9 +45,9 @@ function newContribution(agentId) {
 function newEvaluation(contributionId, evaluatorId, evaluatedValue, reputationStake){
     createEvaluation(evaluatorId, contributionId, evaluatedValue);
     // save agents' history to the current contribution evaluations total, per network
-    var contribution = getItemById(contributions, contributionId);
+    var contribution = getItemById(db.contributions, contributionId);
     if (contribution.evaluations.length > 0) {
-        var agent = getItemById(agents, evaluatorId);
+        var agent = getItemById(db.agents, evaluatorId);
         _.each(agent.networks, function(net) {
             var netStats = getItemById(contribution.networks, net.id) || factory.createNetStatsForContribution(net.id);
             netStats.totalVotedRep += net.reputationBalance;
@@ -97,8 +92,8 @@ function getParticipantsList(currentEvaluations){
     var participants = [];
     var evaluatorsIds = _.pluck(currentEvaluations, "agentId");
     _.each(evaluatorsIds, function(evaluatorId) {
-        var agent = getItemById(agents, evaluatorId);
-        participants.concat(agents.networks);
+        var agent = getItemById(db.agents, evaluatorId);
+        participants.concat(db.agents.networks);
     });
     return participants;
 }
@@ -146,11 +141,11 @@ function contribute(agentId, evaluatedValue) {
 
 function getAgentsReputationById(agentId) {
     //inside what network does the reputation stands?
-    return agents[agentId].networks[0].reputationBalance;
+    return db.agents[agentId].networks[0].reputationBalance;
 }
 
 function getParticipants(agentId, networkId) {
-     return _.find(agents[agentId].networks, function(bal) {
+     return _.find(db.agents[agentId].networks, function(bal) {
         return bal.id = networkId;
     });
 }
@@ -158,45 +153,33 @@ function getParticipants(agentId, networkId) {
 function createContribution(agentId) {
     if (typeof agentId == 'undefined') throw new Error('Agent Id is Missing');
     var instance = factory.createContribution(agentId);
-    contributions.push(instance);
+    db.contributions.push(instance);
     return instance;
 }
 
 function createEvaluation(agentId, contributionId, evaluatedValue) {
-    if (!_.find(contributions, function(con) { return con.id === contributionId })) throw new Error('Contribution Does Not Exist');
+    if (!_.find(db.contributions, function(con) { return con.id === contributionId })) throw new Error('Contribution Does Not Exist');
     var instance = factory.createEvaluation(agentId, contributionId, evaluatedValue);
-    evaluations.push(instance);
+    db.evaluations.push(instance);
     return instance;
 }
 
 function createNetwork(agentId) {
     var instance = factory.createNetwork(agentId);
-    if (_.find(networks, function(net) { return net.id === instance.id}))
+    if (_.find(db.networks, function(net) { return net.id === instance.id}))
     {
         return new Error('Network Already Exists');
     } else {
         instance.networks.push(factory.createNetStatsForNet(0));
-        networks.push(instance);
+        db.networks.push(instance);
     }
     return instance;
 }
 
 function existingContribution(agentId) {
     // Better search for an empty contribution array on agent object
-    return _.find(contributions, function (item) {
+    return _.find(db.contributions, function (item) {
         return item.agentId == agentId;
     });
 }
 
-function initDB() {
-    agents = [];
-    contributions = [];
-    networks = [];
-    evaluations = [];
-    return {
-        networks: networks,
-        agents: agents,
-        contributions: contributions,
-        evaluations: evaluations
-    }
-}
