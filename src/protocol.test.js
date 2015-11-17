@@ -120,8 +120,6 @@ describe('protocol function', function () {
                 if (err) {
                     throw err;
                 }
-                //createdDir === path.resolve('../data'); //=> true
-                //fs.readFileSync('./data/testOutput.txt').toString(); //=> 'Hi!'
             });
         });
     });

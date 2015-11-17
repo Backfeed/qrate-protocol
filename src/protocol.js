@@ -48,6 +48,7 @@ function newContribution(agentId) {
 function newEvaluation(contributionId, evaluatorId, evaluatedValue, reputationStake){
     createEvaluation(evaluatorId, contributionId, evaluatedValue);
     // save agents' history to the current contribution evaluations total, per network
+    // if first evaluation save to last
     saveEvaluatorStatsForContribution(evaluatorId, contributionId);
     // this updates a new array and NOT the referenced array. should create an update function or update the original array live.
     var evaluators = getParticipantsList(currentEvaluations);
