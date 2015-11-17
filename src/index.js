@@ -15,3 +15,4 @@ module.exports = {
 // when creating a new contribution inside what network does the reputation stands? networkId = 0 ?? see contribute and getAgentsReputationById
 // please be as descriptive as possible in the newEvaluation step
 // reputationEvolution - should return new reputation of 1 if this was the first evaluation?
+// when seeding the first user will he be the creator of network 0?

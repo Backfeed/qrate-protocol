@@ -3,7 +3,10 @@
 var expect = require('chai').expect;
 var assert = require('chai').assert;
 var _ = require('lodash');
+var outputFile = require('output-file');
 var protocol = require('./protocol');
+
+
 
 describe('protocol function', function () {
     describe('newUser', function () {
@@ -108,6 +111,18 @@ describe('protocol function', function () {
         });
         xit('should return new reputation of 1 if this was the first evaluation', function () {
             expect(protocol.reputationEvolution(0,0,1,0,1)).to.be.equal(1);
+        });
+    });
+    describe('output', function () {
+        it('db object to a file', function () {
+            outputFile('./data/testOutput.json', JSON.stringify(protocol.db, null, 4), function (err, createdDir) {
+                console.log(err);
+                if (err) {
+                    throw err;
+                }
+                //createdDir === path.resolve('../data'); //=> true
+                //fs.readFileSync('./data/testOutput.txt').toString(); //=> 'Hi!'
+            });
         });
     });
 });
