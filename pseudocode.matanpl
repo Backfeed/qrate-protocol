@@ -1,0 +1,230 @@
+# -*- coding: utf-8 -*-
+import random
+
+########################
+
+# DATABASES
+
+userDb = {{tokenBalance, reputationBalance}_networkIndex, {contributionIndex}_ownContributions, {evaluationIndex}_ownEvaluations, firstContributionTimestamp}_userIndex
+networkDb = {{tokenBalance, reputationBalance}_networkIndex, {contributionIndex}_ownContributions, {evaluationIndex}_ownEvaluations, {userIndex}_ownUsers, NetworkInceptionTimestamp}_networkIndex
+contributionDb = {contributorId, totalVotedRep, weightedMedian, weightedAverage, tokensPaid, contributionTimestamp}_contributionIndex
+evaluationDb = {{evaluatorId, evaluatedValue, {evaluatorReputation}_networkIndex, evaluationTimestamp}_evaluationIndex}}_contributionIndex
+
+# NEW NEW NEW in contributionDb we added a new prop 'tokensPaid' which is the number of tokens paid to the contributor. Equivalent to the "last maximal weightedMedian"
+
+#######################
+
+# qrate CONSTANTS
+
+CONTRIBUTION_FEE=1
+REPUTATION_FRACTION_STAKE = 0.01
+
+# New user starts with 150 tokens and reputation
+# searching costs 1 token
+# submitting a tag costs 10 tokens
+# reward for a successful tag is 20 tokens
+# submitting a link costs X tokens
+# reward for a successful tag is X tokens
+# endorsing / deendorsing / adding a tag costs 5 reputation
+# initial number of tokens in network
+
+#########################
+
+# API IN-CALLS for the PROTOCOL SERVICE and their internal flow
+
+# in qrate only: contributionFee == CONTRIBUTION_FEE && reputationStake == REPUTATION_FRACTION_STAKE * contributorReputation
+protocol.contribute(contributorId, evaluatedValue, contributionFee, reputationStake)  
+   	-> contributionIndex = newContribution(contributorId, contributionFee)
+   		-> escrowFee(networkId, contributorId, contributionFee)
+	-> newEvaluation(contributionIndex, contributorId, evaluatedValue, reputationStake) # still implicitly calling updateReputationBalance internally (but with 0 deltaReputation)
+	-> if (first contribution of user) newNetwork(contributorId, sparseArray[{{1,{contributorId}}])
+
+# in qrate only: reputationStake == REPUTATION_FRACTION_STAKE * evaluatorReputation
+protocol.evaluate(contributionIndex, evaluatorId, evaluatedValue, reputationStake)
+	-> newEvaluation(contributionIndex, evaluatorId, evaluatedValue, reputationStake) 
+
+# API FETCH (DBs reads)
+
+#userObject = fetchUserReputation(userIndex)
+#userObject.reputationBalance
+
+fetchUsersReputation
+fetchUser(userId)
+
+# API PRINT (DBs creates)
+
+newAgent
+
+newNetwork(founderId, {initialReputation}_userIndex)
+
+# API UPDATE (DBs updates)
+
+updateTokenBalance({{deltaTokens}_userIndex}_networkIndex)
+	-> updateTokenBalanceInUserDb
+	-> updateTokenBalanceInNetworkDb
+
+
+updateReputationBalance({{deltaReputation}_userIndex}_networkIndex)
+	-> updateReputationBalanceInUserDb
+	-> updateReputationBalanceInNetworkDb
+
+
+updateTokenBalanceInUserDb
+updateTokenBalanceInNetworkDb
+updateReputationBalanceInUserDb
+updateReputationBalanceInNetworkDb
+
+
+# INTERNAL FUNCTIONS ==> CALCULATOR
+
+newContribution(contributorId, contributionFee)
+	-> newRowInContributionDb(contributorId, totalVotedRep=0, weightedMedian=0, weightedAverage=0, tokensPaid=0, contributionTimestamp=now)
+	-> updateTokenBalance({{0-contributionFee}_contributorId}_0)  
+
+newEvaluation(contributionIndex, evaluatorId, evaluatedValue, reputationStake)
+	-> newRowInEvaluationDb(contributionIndex, evaluatorId, evaluatedValue, {evaluatorReputation}_networkIndex, evaluationTimestamp=now)
+
+{  ... run over all networks that the evaluatorId has reputation in  ...  and over all users that have reputation in those networks ... 	
+	-> lastUserReputation(networkId, evaluatorId) = fetch from userDb
+	-> lastTotalVotedReputation(networkId) = fetch evaluations from evaluation db and sum all reputation voted so far (per network) 
+	-> newTotalVotedReputation = same as above but including current voting reputation as well
+	-> lastTotalAlignedReputation = fetch evaluations from evaluation db and sum all reputations that voted the same as user, so far (per network)
+	-> newTotalAlignedReputation = the same as above but including current voting reputation as well
+	-> newUserReputation(lastUserReputation, lastTotalVotedReputation, newTotalVotedReputation, lastTotalAlignedReputation, newTotalAlignedReputation) 
+	-> updateReputationBalance  (... with newUserReputation ... for all users ...)
+}
+
+newUserReputation = reputationEvolution(lastUserReputation, lastTotalVotedReputation, newTotalVotedReputation, lastTotalAlignedReputation, newTotalAlignedReputation) {
+	
+	result = (1 - REPUTATION_FRACTION_STAKE)*(userReputationThen) + (REPUTATION_FRACTION_STAKE*userReputationThen*totalAlignedReputationNow*totalVotedReputationThen)/(totalAlignedReputationThen*totalVotedReputationNow)
+	return result;	
+}
+
+
+# COMPOSITES  (of Monadic functions from different categories)
+
+
+# move tokenFee from user to escrow
+# escrow has hardcoded userId 0
+# networkId is hardcoded 0 (the tokens of which (only for now) to be used for fee payment)
+escrowFee(networkId, userId, tokenFee) 
+	-> updateTokenBalance
+
+
+##############################
+
+
+
+
+
+
+#######################################################################################################################
+
+
+
+
+
+
+
+
+
+
+# THE END OF THE CODE
+
+
+
+
+
+
+
+
+
+
+########################################################################################################################
+
+# SIMULATION
+
+N_ACTIONS=10
+
+P_NEW_CONTRIB = 0.1
+P_NEW_AGENT = 0.1
+
+# start with one agent with reputation=1 in one network
+# one network with reputation=0 in itself
+# and an ordered (still empty) list of all events —contrib's & eval's, structured as
+# {event_id, tokenFee, evaluation, creator_id, {rep_stake list in all networks}}
+user_db = [[1]]
+network_db = [[0]]
+contribution_db = [...]
+evaluation_db = [...]
+
+
+for i in xrange(N_ACTIONS):
+	r = random.random()
+
+	if  r < P_NEW_CONTRIB:
+		new_contribution()
+
+	elif r < P_NEW_CONTRIB + P_NEW_AGENT:
+		new_agent()
+
+	else:
+		new_evaluation()
+
+
+print 2+2
+
+#########################
+
+# FUNCTIONS
+
+# choose a random integer between 0 and 10^8
+def rand():
+	return random.randint(0, 100000000)
+
+
+def new_contribution():
+	print '== new contribution =='
+	agentid = random.randint(0, len(agents_db)-1)
+	print 'agentid:', agentid
+
+	agent = agents_db[agentid]
+	print 'agents_db:', agents_db
+	print 'agent:', agent
+
+	agent = [(1-REP_TO_STAKE)*r for r in agent]
+	print 'agent after stake:', agent 
+
+	contribution = (agentid, [(REP_TO_STAKE)*r for r in agent])
+	print 'contribution:', contribution
+
+	events_db.append(contribution)
+	print 'events_db', events_db
+
+
+def new_evaluation():
+	print '== new evaluation =='
+	if len(events_db) == 0:
+		return
+
+	r = random.randint(0, len(events_db)-1)
+	print 'r', r
+	
+	contrib = events_db[r]
+	print 'contrib', contrib
+
+	agentid = random.randint(0, len(agents_db)-1)
+	print 'agentid', agentid
+	
+	agent = agents_db[agentid]
+	print 'agent', agent
+
+	agent = [(1-REP_TO_STAKE)*r for r in agent]
+	print 'agent after stake', agent
+
+	contrib[CONTRIB_REP]
+	print 'contrib', contrib[CONTRIB_REP]
+
+
+def new_agent():
+	print '== new agent created =='
