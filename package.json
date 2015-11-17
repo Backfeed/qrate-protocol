@@ -5,7 +5,9 @@
   "main": "src/index.js",
   "scripts": {
     "test": "mocha src/*.test.js -w",
-    "test:single": "mocha src/index.test.js"
+    "test:index": "mocha src/index.test.js -w",
+    "test:protocol": "mocha src/protocol.test.js -w",
+    "test:factory": "mocha src/factory.test.js -w"
   },
   "repository": {
     "type": "git",

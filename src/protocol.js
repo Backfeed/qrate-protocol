@@ -22,6 +22,7 @@ module.exports = {
     createContribution: createContribution,
     createEvaluation: createEvaluation,
     existingContribution: existingContribution,
+    getItemById: getItemById,
     db: db
 };
 
@@ -148,6 +149,8 @@ function getParticipatingNetwork(agentId, networkId) {
 
 function createContribution(agentId) {
     var instance = factory.createContribution(agentId);
+    var agent = getItemById(db.agents, agentId);
+    agent.contributions.push(instance.id);
     db.contributions.push(instance);
     return instance;
 }
@@ -164,7 +167,7 @@ function createNetwork(agentId) {
     var instance = factory.createNetwork(agentId);
     if (_.find(db.networks, function(net) { return net.agentId === instance.agentId}))
     {
-        return new Error('Network Already Exists');
+        throw new Error('Network Already Exists');
     } else {
         instance.networks.push(factory.createNetStatsForNet(0));
         db.networks.push(instance);

@@ -1,6 +1,11 @@
+'use strict';
+
 var expect = require('chai').expect;
+var assert = require('chai').assert;
+var _ = require('lodash');
 var index = require('./index');
-xdescribe('test the module API', function () {
+
+xdescribe('index function', function () {
     describe('contribute', function () {
         it('should submit a new contribution', function () {
             var agentId = 1;

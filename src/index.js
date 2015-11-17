@@ -14,3 +14,4 @@ module.exports = {
 // how to handle distribution of tokens?
 // when creating a new contribution inside what network does the reputation stands? networkId = 0 ?? see contribute and getAgentsReputationById
 // please be as descriptive as possible in the newEvaluation step
+// reputationEvolution - should return new reputation of 1 if this was the first evaluation?

@@ -1,10 +1,11 @@
 'use strict';
 
 var expect = require('chai').expect;
-var protocol = require('./protocol');
+var assert = require('chai').assert;
 var _ = require('lodash');
-var C = require('./constants');
-describe.only('test the protocol functions', function () {
+var protocol = require('./protocol');
+
+describe('protocol function', function () {
     describe('newUser', function () {
         it('should create a new user', function () {
             expect(protocol.newUser()).to.be.above(0);
@@ -24,20 +25,31 @@ describe.only('test the protocol functions', function () {
             //console.log(protocol.db.networks);
         });
         it('should fail if network exists', function () {
-            expect(String(protocol.createNetwork(1))).to.equal('Error: Network Already Exists');
+            //expect(String(protocol.createNetwork(1))).to.equal('Error: Network Already Exists');
+            assert.throws(function() {protocol.createNetwork(1)});
         });
     });
     describe('createContribution', function () {
+        var contribution;
+        var agentId = 1;
         it('should create a new contribution', function () {
-            expect(protocol.createContribution(1).id).to.be.above(0);
+            //console.log(protocol.db.agents);
+            contribution = protocol.createContribution(agentId);
+            expect(contribution.id).to.be.above(0);
             expect(protocol.db.contributions.length).to.be.above(0);
             //console.log(protocol.db.contributions);
         });
+        it('should update agent contributions array', function () {
+            var agent = protocol.getItemById(protocol.db.agents, agentId);
+            expect(_.includes(agent.contributions, contribution.id)).to.be.true;
+            //console.log(protocol.db.agents);
+            //console.log(agent.contributions);
+        });
     });
     describe('createEvaluation', function () {
-        xit('should throw error if contribution does not exists', function () {
-            //expect(String(protocol.createEvaluation(1,3,4))).to.equal('Error: Contribution Does Not Exists');
-            //expect(protocol.createEvaluation(1,4,4)).to.throw(Error);
+        it('should throw error if contribution does not exists', function () {
+            //expect(String(protocol.createEvaluation(1,3,4))).to.equal('Error: Contribution Does Not Exist');
+            assert.throws(function() {protocol.createEvaluation(1,4,4)});
         });
         it('should create a new evaluation', function () {
             //console.log(protocol.db.contributions);
@@ -93,6 +105,9 @@ describe.only('test the protocol functions', function () {
     describe('reputationEvolution', function () {
         it('should calc the new reputation state by checking alignment with past distribution', function () {
             expect(protocol.reputationEvolution(8,3,4,5,6)).to.be.equal(7.992);
+        });
+        xit('should return new reputation of 1 if this was the first evaluation', function () {
+            expect(protocol.reputationEvolution(0,0,1,0,1)).to.be.equal(1);
         });
     });
 });
