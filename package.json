@@ -20,7 +20,8 @@
   "author": "Backfeed Team",
   "license": "GPL",
   "dependencies": {
-    "lodash": "3.10.1"
+    "lodash": "3.10.1",
+    "mathjs": "2.4.2"
   },
   "devDependencies": {
     "chai": "3.4.0",
