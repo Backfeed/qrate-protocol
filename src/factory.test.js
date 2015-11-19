@@ -5,7 +5,7 @@ var assert = require('chai').assert;
 var _ = require('lodash');
 var factory = require('./factory');
 
-describe('factory function', function () {
+xdescribe('factory function', function () {
     describe('createAgent', function () {
         it('should create an agent', function () {
             expect(factory.createAgent().id).to.be.equal(1);
