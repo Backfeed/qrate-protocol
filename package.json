@@ -7,6 +7,7 @@
     "test": "mocha src/*.test.js -w",
     "test:index": "mocha src/index.test.js -w",
     "test:protocol": "mocha src/protocol.test.js -w",
+    "test:protocolCI": "mocha src/protocol.test.js",
     "test:factory": "mocha src/factory.test.js -w"
   },
   "repository": {
@@ -17,6 +18,11 @@
     "backfeed",
     "protocol"
   ],
+  "config": {
+    "ghooks": {
+      "pre-commit": "npm run test:protocolCI"
+    }
+  },
   "author": "Backfeed Team",
   "license": "GPL",
   "dependencies": {
@@ -25,6 +31,7 @@
   },
   "devDependencies": {
     "chai": "3.4.0",
+    "ghooks": "1.0.0",
     "mocha": "2.3.3",
     "mockjs": "*",
     "output-file": "1.1.1"
