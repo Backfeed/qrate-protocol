@@ -10,7 +10,7 @@
     "test:protocol": "mocha src/protocol.test.js -w",
     "test:protocolCI": "mocha src/protocol.test.js",
     "test:factory": "mocha src/factory.test.js -w",
-    "check-coverage": "istanbul check-coverage --statements 100 --branches 100 --functions 100 --lines 100",
+    "check-coverage": "istanbul check-coverage --statements 50 --branches 50 --functions 50 --lines 50",
     "report-coverage": "cat ./coverage/lcov.info | codecov",
     "start": "npm run test",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
@@ -23,11 +23,6 @@
     "backfeed",
     "protocol"
   ],
-  "config": {
-    "ghooks": {
-      "pre-commit": "npm run test:protocolCI"
-    }
-  },
   "author": "Backfeed Team",
   "license": "GPL",
   "bugs": {
@@ -48,5 +43,13 @@
     "mocha": "2.3.3",
     "mockjs": "*",
     "output-file": "1.1.1"
+  },
+  "czConfig": {
+    "path": "node_modules/cz-conventional-changelog"
+  },
+  "config": {
+    "ghooks": {
+      "pre-commit": "npm run test && npm run check-coverage"
+    }
   }
 }
