@@ -1,6 +1,6 @@
 'use strict';
 
-var db = require('./db').connect();
+var db = require('./db');
 var factory = require('./factory');
 var C = require('./constants');
 var _ = require('lodash');
@@ -10,7 +10,6 @@ module.exports = {
     contribute: contribute,
     evaluate: evaluate,
     fetchUserReputation: fetchUserReputation,
-    newUser: newUser,
     newContribution: newContribution,
     newEvaluation: newEvaluation,
     escrowFee: escrowFee,
@@ -18,23 +17,12 @@ module.exports = {
     updateReputationBalance:updateReputationBalance,
     reputationEvolution: reputationEvolution,
 
-    createNetwork: createNetwork,
-    createContribution: createContribution,
-    createEvaluation: createEvaluation,
-    existingContribution: existingContribution,
     db: db
 };
 
 //in qrate only: reputationStake == REPUTATION_FRACTION_STAKE * evaluatorReputation
 function evaluate(contributionId, evaluatorId, evaluatedValue, reputationStake){
     newEvaluation(contributionId, evaluatorId, evaluatedValue, reputationStake);
-}
-
-function newUser() {
-    var instance = factory.createAgent();
-    instance.networks.push(factory.createNetStatsForAgent(0));
-    db.agents.push(instance);
-    return instance.id;
 }
 
 function newContribution(agentId) {
@@ -121,7 +109,7 @@ function contribute(agentId, evaluatedValue) {
     var reputationStake = getAgentsReputationById(agentId) * REPUTATION_FRACTION_STAKE;
     //newEvaluation(contributionId, agentId, evaluatedValue, reputationStake);
     // should create a new network for agent given being its first contribution
-    if (!existingContribution(agentId)) createNetwork(agentId);
+    if (!db.existingContribution(agentId)) db.createNetwork(agentId);
 }
 
 function getAgentsReputationById(agentId) {
@@ -138,37 +126,3 @@ function getParticipatingNetwork(agentId, networkId) {
     var agent = _.find(db.agents, 'id', agentId);
     return _.find(agent.networks, 'id', networkId);
 }
-
-function createContribution(agentId) {
-    var instance = factory.createContribution(agentId);
-    var agent = _.find(db.agents, 'id', agentId);
-    agent.contributions.push(instance.id);
-    db.contributions.push(instance);
-    return instance;
-}
-
-function createEvaluation(agentId, contributionId, evaluatedValue) {
-    var contribution = _.find(db.contributions, 'id', contributionId);
-    if (!contribution) throw new Error('Contribution Does Not Exist');
-    var instance = factory.createEvaluation(agentId, contributionId, evaluatedValue);
-    db.evaluations.push(instance);
-    return instance;
-}
-
-function createNetwork(agentId) {
-    var instance = factory.createNetwork(agentId);
-    if (_.find(db.networks, 'agentId', instance.agentId))
-    {
-        throw new Error('Network Already Exists');
-    } else {
-        instance.networks.push(factory.createNetStatsForNet(0));
-        db.networks.push(instance);
-    }
-    return instance;
-}
-
-function existingContribution(agentId) {
-    // Better search for an empty contribution array on agent object
-    return _.find(db.contributions, 'agentId', agentId);
-}
-

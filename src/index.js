@@ -1,11 +1,12 @@
 'use strict';
 
 var protocol = require('./protocol');
+var db = require('./db');
 module.exports = {
     contribute: protocol.submitContribution,
     evaluate: protocol.submitEvaluation,
     fetchUserReputation: protocol.fetchUserReputation,
-    newUser: protocol.newUser
+    newUser: db.newUser
 };
 
 /*
@@ -18,7 +19,7 @@ when creating a new contribution inside what network does the reputation stands?
 please be as descriptive as possible in the newEvaluation step
 reputationEvolution - should return new reputation of 1 if this was the first evaluation?
 when seeding the first user will he be the creator of network 0?
-if a user has reputation in a network from 3 different contributions, is the total reputation of that user be summed?
+if a user has reputation in a network from 3 different contributions, is the total reputation of that user be summed?kkk
 
 how does the founding contribution look like?
 A Backfeed user with 100% rep?

@@ -5,68 +5,20 @@ var assert = require('chai').assert;
 var _ = require('lodash');
 var outputFile = require('output-file');
 var protocol = require('./protocol');
+var db = require('./db');
 
-
+beforeEach(function() {
+    db.reset();
+    db.newUser();
+    db.newUser();
+    db.createNetwork(db.agents[0].id);
+    db.createContribution(db.agents[1].id);
+    //console.log(db.agents);
+    //console.log(db.networks);
+});
 
 describe('protocol function', function () {
-    describe('newUser', function () {
-        it('should create a new user', function () {
-            expect(protocol.newUser()).to.be.above(0);
-            expect(protocol.db.agents.length).to.be.equal(1);
-            expect(protocol.db.agents[0].networks.length).to.be.equal(1);
-            expect(protocol.newUser()).to.be.above(1);
-            expect(protocol.db.agents.length).to.be.equal(2);
-            expect(protocol.db.agents[0].networks.length).to.be.equal(1);
-            //console.log(protocol.db.agents);
-        });
-    });
-    describe('createNetwork', function () {
-        it('should create a new network', function () {
-            //expect(protocol.createNetwork(_.last(db.networks).id++).id).to.be.above(0);
-            expect(protocol.createNetwork(1).id).to.be.above(0);
-            expect(protocol.db.networks.length).to.be.above(0);
-            //console.log(protocol.db.networks);
-        });
-        it('should fail if network exists', function () {
-            //expect(String(protocol.createNetwork(1))).to.equal('Error: Network Already Exists');
-            assert.throws(function() {protocol.createNetwork(1)});
-        });
-    });
-    describe('createContribution', function () {
-        var contribution;
-        var agentId = 1;
-        it('should create a new contribution', function () {
-            //console.log(protocol.db.agents);
-            contribution = protocol.createContribution(agentId);
-            expect(contribution.id).to.be.above(0);
-            expect(protocol.db.contributions.length).to.be.above(0);
-            //console.log(protocol.db.contributions);
-        });
-        it('should update agent contributions array', function () {
-            var agent = _.find(protocol.db.agents, 'id', agentId);
-            expect(_.includes(agent.contributions, contribution.id)).to.be.true;
-            //console.log(protocol.db.agents);
-            //console.log(agent.contributions);
-        });
-    });
-    describe('createEvaluation', function () {
-        it('should throw error if contribution does not exists', function () {
-            //expect(String(protocol.createEvaluation(1,3,4))).to.equal('Error: Contribution Does Not Exist');
-            assert.throws(function() {protocol.createEvaluation(1,4,4)});
-        });
-        it('should create a new evaluation', function () {
-            //console.log(protocol.db.contributions);
-            expect(protocol.createEvaluation(1,5,4).id).to.be.above(0);
-            expect(protocol.db.evaluations.length).to.be.above(0);
-            //console.log(protocol.db.evaluations);
-        });
-    });
-    describe('existingContribution', function () {
-        it('should check if this is the first contribution of an agent', function () {
-            expect(protocol.existingContribution(1)).to.not.be.undefined;
-            expect(protocol.existingContribution(0)).to.be.undefined;
-        });
-    });
+
     xdescribe('updateReputationBalance', function () {
         it('should distribute agents reputation in participating networks', function () {
         });
@@ -96,13 +48,9 @@ describe('protocol function', function () {
     describe('contribute', function () {
         xit('should create the first evaluation for the creator agent', function () {
         });
-        it('should create a new network for agent given being its first contribution', function () {
-            //console.log(protocol.db.contributions);
-            //console.log(protocol.db.agents);
-            //console.log(protocol.db.networks);
-            protocol.contribute(2, 1);
-            //console.log(protocol.db.networks);
-            expect(protocol.db.networks.length).to.be.equal(2);
+        it('should not create a new network for agent given its not the first contribution', function () {
+            protocol.contribute(db.agents[1].id, 1);
+            expect(protocol.db.networks.length).to.be.equal(1);
         });
     });
     describe('reputationEvolution', function () {

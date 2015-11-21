@@ -1,38 +1,71 @@
 'use strict';
 
-var agents;
-var networks;
-var contributions;
-var evaluations;
+var _ = require('lodash');
+var factory = require('./factory');
+
+var agents = [];
+var networks = [];
+var contributions = [];
+var evaluations = [];
 
 //var mock = require('mockjs');
 
 module.exports = {
-    connect: emptyDB
+    networks: networks,
+    agents: agents,
+    contributions: contributions,
+    evaluations: evaluations,
+    newUser: newUser,
+    createNetwork: createNetwork,
+    createContribution: createContribution,
+    createEvaluation: createEvaluation,
+    existingContribution: existingContribution,
+    reset: reset
 };
 
-function jsonDB() {
-    return {
-        agents: require('../data/db.json').agents,
-        networks: require('../data/db.json').networks,
-        contributions: require('../data/db.json').contributions,
-        evaluations: require('../data/db.json').evaluations
-    }
+function newUser() {
+    var instance = factory.createAgent();
+    instance.networks.push(factory.createNetStatsForAgent(0));
+    agents.push(instance);
+    return instance.id;
 }
 
-function resetDB() {
-    agents = [];
-    contributions = [];
-    networks = [];
-    evaluations = [];
+function createContribution(agentId) {
+    var instance = factory.createContribution(agentId);
+    var agent = _.find(agents, 'id', agentId);
+    agent.contributions.push(instance.id);
+    contributions.push(instance);
+    return instance;
 }
 
-function emptyDB() {
-    resetDB();
-    return {
-        networks: networks,
-        agents: agents,
-        contributions: contributions,
-        evaluations: evaluations
+function createEvaluation(agentId, contributionId, evaluatedValue) {
+    var contribution = _.find(contributions, 'id', contributionId);
+    if (!contribution) throw new Error('Contribution Does Not Exist');
+    var instance = factory.createEvaluation(agentId, contributionId, evaluatedValue);
+    evaluations.push(instance);
+    return instance;
+}
+
+function createNetwork(agentId) {
+    var instance = factory.createNetwork(agentId);
+    if (_.find(networks, 'agentId', instance.agentId))
+    {
+        throw new Error('Network Already Exists');
+    } else {
+        instance.networks.push(factory.createNetStatsForNet(0));
+        networks.push(instance);
     }
+    return instance;
+}
+
+function existingContribution(agentId) {
+    // Better search for an empty contribution array on agent object
+    return _.find(contributions, 'agentId', agentId);
+}
+
+function reset() {
+    agents.length = 0;
+    networks.length = 0;
+    contributions.length = 0;
+    evaluations.length = 0;
 }

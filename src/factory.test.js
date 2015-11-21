@@ -5,10 +5,10 @@ var assert = require('chai').assert;
 var _ = require('lodash');
 var factory = require('./factory');
 
-xdescribe('factory function', function () {
+describe('factory function', function () {
     describe('createAgent', function () {
         it('should create an agent', function () {
-            expect(factory.createAgent().id).to.be.equal(1);
+            expect(factory.createAgent().id).to.be.above(0);
         });
         it('should create an agent with an empty networks array', function () {
             expect(factory.createAgent().networks.length).to.be.equal(0);
