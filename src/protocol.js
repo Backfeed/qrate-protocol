@@ -33,12 +33,14 @@ function newContribution(agentId) {
 }
 
 function newEvaluation(contributionId, evaluatorId, evaluatedValue, reputationStake){
+    var contribution = _.find(db.contributions, 'id', contributionId);
+    var evaluator = _.find(db.agents, 'id', evaluatorId);
+
     createEvaluation(evaluatorId, contributionId, evaluatedValue);
     // save agents' history to the current contribution evaluations total, per network
     // if first evaluation save to last
-    saveEvaluatorStatsForContribution(evaluatorId, contributionId);
+    setEvaluatorStatsForContribution(evaluator, contribution);
 
-    var evaluator = _.find(db.agents, 'id', evaluatorId);
     // take the new evaluator networks and find them in all existing evaluations networks.
     _.each(evaluator.networks, function(net) {
         var lastUserReputation = net.reputationBalance;//(networkId, evaluatorId) = fetch from userDb
@@ -46,12 +48,12 @@ function newEvaluation(contributionId, evaluatorId, evaluatedValue, reputationSt
         var newTotalVotedReputation = net.reputationBalance;// = same as above but including current voting reputation as well
         var lastTotalAlignedReputation = 0;// =  sum of all reputations that voted the same as user, so far (per network)
         var newTotalAlignedReputation = net.reputationBalance;// = the same as above but including current voting reputation as well
-        _.each(evaluations, function(evaluation) {
-            var agent = _.find(db.agents, 'id', evaluation.agentId);
-            var netStat = _.find(agent.networks, 'id', net.id);
+        _.each(contribution.evaluations, function(prevEvaluation) {
+            var pastEvaluator = _.find(db.agents, 'id', prevEvaluation.agentId);
+            var netStat = _.find(pastEvaluator.networks, 'id', net.id);
             if (netStat) {
                 lastTotalVotedReputation += netStat.reputationBalance;
-                if (evaluation.evaluatedValue === evaluatedValue) {
+                if (prevEvaluation.evaluatedValue === evaluatedValue) {
                     lastTotalAlignedReputation += netStat.reputationBalance;
                 }
             }
@@ -67,10 +69,8 @@ function newEvaluation(contributionId, evaluatorId, evaluatedValue, reputationSt
     //updateTokenBalance(evaluators, delta);
     updateReputationBalance(evaluators, fee);
 }
-function saveEvaluatorStatsForContribution(evaluatorId, contributionId) {
-    var contribution = _.find(db.contributions, 'id', contributionId);
-    var agent = _.find(db.agents, 'id', evaluatorId);
-    _.each(agent.networks, function(net) {
+function setEvaluatorStatsForContribution(evaluator, contribution) {
+    _.each(evaluator.networks, function(net) {
         var netStats = _.find(contribution.networks, 'id', net.id) || factory.createNetStatsForContribution(net.id);
         netStats.totalVotedRep += net.reputationBalance;
         netStats.votes.push(evaluatedValue);
