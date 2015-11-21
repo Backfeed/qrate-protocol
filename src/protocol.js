@@ -9,7 +9,6 @@ var math = require('mathjs');
 module.exports = {
     contribute: contribute,
     evaluate: evaluate,
-    fetchUserReputation: fetchUserReputation,
     newContribution: newContribution,
     newEvaluation: newEvaluation,
     escrowFee: escrowFee,
@@ -34,9 +33,11 @@ function newContribution(agentId) {
 
 function newEvaluation(contributionId, evaluatorId, evaluatedValue, reputationStake){
     var contribution = _.find(db.contributions, 'id', contributionId);
+    var contributor = _.find(db.agents, 'id', contribution.agentId);
     var evaluator = _.find(db.agents, 'id', evaluatorId);
 
     db.createEvaluation(evaluatorId, contributionId, evaluatedValue);
+    setNetStatForEvaluator(evaluator, contributorId);
     // save agents' history to the current contribution evaluations total, per network
     // if first evaluation save to last
     setEvaluatorStatsForContribution(evaluator, contribution);
@@ -67,6 +68,15 @@ function newEvaluation(contributionId, evaluatorId, evaluatedValue, reputationSt
     //updateTokenBalance(evaluators, delta);
     updateReputationBalance(evaluators, fee);
 }
+function setNetStatForEvaluator(evaluator, contributorId) {
+    var contributorNetwork = _.find(db.networks, 'agentId', contributorId);
+    var netStats = _.find(evaluator.networks, 'id', contributorNetwork.id);
+    if (!netStats) {
+        netStats = factory.createNetStatsForAgent(contributorNetwork.id);
+        evaluator.networks.push(netStats);
+    }
+
+}
 function getCurrentReputationState(evaluations, newVotedValue) {
     var totalReputationNow = 0;
     var totalAlignedReputationNow = 0;
@@ -87,7 +97,11 @@ function getCurrentReputationState(evaluations, newVotedValue) {
 }
 function setEvaluatorStatsForContribution(evaluator, contribution) {
     _.each(evaluator.networks, function(net) {
-        var netStats = _.find(contribution.networks, 'id', net.id) || factory.createNetStatsForContribution(net.id);
+        var netStats = _.find(contribution.networks, 'id', net.id);
+        if (!netStats) {
+            netStats = factory.createNetStatsForContribution(net.id);
+            contribution.networks.push(netStats);
+        }
         netStats.totalVotedRep += net.reputationBalance;
         netStats.votes.push(evaluatedValue);
         netStats.perVote[evaluatedValue] += 1;
@@ -101,20 +115,14 @@ function reputationEvolution(lastUserReputation, lastTotalVotedReputation, newTo
         (REPUTATION_FRACTION_STAKE*lastUserReputation*newTotalAlignedReputation*lastTotalVotedReputation)/
         (lastTotalAlignedReputation*newTotalVotedReputation)
 }
-function fetchUserReputation() {
-
-}
-
 function escrowFee(participants, fee) {
     updateTokenBalance(participants, fee);
 }
-
 function updateTokenBalance(participants, delta) {
     _.each(participants, function(bal) {
         bal.tokenBalance += delta;
     })
 }
-
 function updateReputationBalance(participants, delta) {
     _.each(participants, function(bal) {
         bal.reputationBalance += delta;

@@ -11,9 +11,9 @@ beforeEach(function() {
     db.newUser();
     db.createNetwork(db.agents[0].id);
     db.createContribution(db.agents[1].id);
-    console.log(db.agents);
+    //console.log(db.agents);
     //console.log(db.networks);
-    console.log(db.contributions);
+    //console.log(db.contributions);
 });
 
 describe('db function', function () {
@@ -22,10 +22,9 @@ describe('db function', function () {
             var len = db.agents.length;
             expect(db.newUser()).to.be.above(0);
             expect(db.agents.length).to.be.equal(len+1);
-            expect(db.agents[0].networks.length).to.be.equal(1);
             expect(db.newUser()).to.be.above(1);
             expect(db.agents.length).to.be.equal(len+2);
-            expect(db.agents[0].networks.length).to.be.equal(1);
+            expect(db.agents[1].networks.length).to.be.equal(1);
             //console.log(db.agents);
         });
     });
@@ -63,9 +62,17 @@ describe('db function', function () {
     });
     describe('existingContribution', function () {
         it('should check if this is the first contribution of an agent', function () {
-            console.log(db.contributions);
+            //console.log(db.contributions);
             expect(db.existingContribution(db.agents[1].id)).to.not.be.undefined;
             expect(db.existingContribution(0)).to.be.undefined;
+        });
+    });
+    describe('fetchUserReputation', function () {
+        it('should fetch agent reputation balance for a given network', function () {
+            //console.log(db.agents[0].networks);
+            //console.log(db.agents[0]);
+            //console.log(db.networks);
+            expect(db.fetchUserReputation(db.agents[0].id, 0)).to.not.be.undefined;
         });
     });
 });

@@ -33,9 +33,9 @@ describe('protocol function', function () {
     });
     xdescribe('newContribution', function () {
        it('should create a new contribution and update reputation balance and escrow fee', function () {
-            console.log(protocol.db.agents);
+            //console.log(protocol.db.agents);
             protocol.newContribution(8);
-            console.log(protocol.db.agents);
+            //console.log(protocol.db.agents);
             expect(protocol.newContribution(8)).to.be.above(0);
         });
     });

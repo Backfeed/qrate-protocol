@@ -5,7 +5,7 @@ var db = require('./db');
 module.exports = {
     contribute: protocol.submitContribution,
     evaluate: protocol.submitEvaluation,
-    fetchUserReputation: protocol.fetchUserReputation,
+    fetchUserReputation: db.fetchUserReputation,
     newUser: db.newUser
 };
 

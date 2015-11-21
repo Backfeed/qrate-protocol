@@ -16,6 +16,7 @@ module.exports = {
     contributions: contributions,
     evaluations: evaluations,
     newUser: newUser,
+    fetchUserReputation: fetchUserReputation,
     createNetwork: createNetwork,
     createContribution: createContribution,
     createEvaluation: createEvaluation,
@@ -28,6 +29,12 @@ function newUser() {
     instance.networks.push(factory.createNetStatsForAgent(0));
     agents.push(instance);
     return instance.id;
+}
+
+function fetchUserReputation(agentId, networkId) {
+    var agent = _.find(agents, 'id', agentId);
+    var netStat = _.find(agent.networks, 'id', networkId);
+    return netStat.reputationBalance;
 }
 
 function createContribution(agentId) {

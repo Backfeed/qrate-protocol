@@ -47,4 +47,22 @@ describe('factory function', function () {
             assert.throws(function() {factory.createEvaluation(1,1)});
         });
     });
+    describe('createNetStatsForContribution', function () {
+        it('should fail to create a NetStatsForContribution when networkId is missing', function () {
+            assert.throws(function() {factory.createNetStatsForContribution()});
+        });
+        it('should create a stats with an empty votes array', function () {
+            expect(factory.createNetStatsForContribution(1).votes.length).to.be.equal(0);
+        });
+    });
+    describe('createNetStatsForAgent', function () {
+        it('should fail to create a NetStatsForAgent when networkId is missing', function () {
+            assert.throws(function() {factory.createNetStatsForAgent()});
+        });
+    });
+    describe('createNetStatsForNet', function () {
+        it('should fail to create a NetStatsForNet when networkId is missing', function () {
+            assert.throws(function() {factory.createNetStatsForNet()});
+        });
+    });
 });
