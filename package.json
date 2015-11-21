@@ -10,7 +10,7 @@
     "test:protocol": "mocha src/protocol.test.js -w",
     "test:protocolCI": "mocha src/protocol.test.js",
     "test:factory": "mocha src/factory.test.js -w",
-    "check-coverage": "istanbul check-coverage --statements 50 --branches 50 --functions 50 --lines 50",
+    "check-coverage": "istanbul check-coverage --statements 20 --branches 20 --functions 20 --lines 20",
     "report-coverage": "cat ./coverage/lcov.info | codecov",
     "start": "npm run test",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"

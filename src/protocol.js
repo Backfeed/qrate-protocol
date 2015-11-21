@@ -22,7 +22,6 @@ module.exports = {
     createContribution: createContribution,
     createEvaluation: createEvaluation,
     existingContribution: existingContribution,
-    getItemById: getItemById,
     db: db
 };
 
@@ -50,17 +49,29 @@ function newEvaluation(contributionId, evaluatorId, evaluatedValue, reputationSt
     // save agents' history to the current contribution evaluations total, per network
     // if first evaluation save to last
     saveEvaluatorStatsForContribution(evaluatorId, contributionId);
-    // this updates a new array and NOT the referenced array. should create an update function or update the original array live.
-    var evaluators = getParticipantsList(currentEvaluations);
-    //var networkIds = _.uniq(_.pluck(evaluators, "id"), true);
 
-    _.each(evaluators, function(agentBalance) {
-        var lastUserReputation = agentBalance.reputationBalance;//(networkId, evaluatorId) = fetch from userDb
-        var lastTotalVotedReputation = getLastTotalVotedReputation(evaluators);
-        var newTotalVotedReputation = 0;// = same as above but including current voting reputation as well
-        var lastTotalAlignedReputation = 0;// = fetch evaluations from evaluation db and sum all reputations that voted the same as user, so far (per network)
-        var newTotalAlignedReputation = 0;// = the same as above but including current voting reputation as well
-        var newUserReputation = reputationEvolution(lastUserReputation, lastTotalVotedReputation, newTotalVotedReputation, lastTotalAlignedReputation, newTotalAlignedReputation);
+    var evaluator = _.find(db.agents, 'id', evaluatorId);
+    // take the new evaluator networks and find them in all existing evaluations networks.
+    _.each(evaluator.networks, function(net) {
+        var lastUserReputation = net.reputationBalance;//(networkId, evaluatorId) = fetch from userDb
+        var lastTotalVotedReputation = 0;// sum of all reputation voted so far (per network)
+        var newTotalVotedReputation = net.reputationBalance;// = same as above but including current voting reputation as well
+        var lastTotalAlignedReputation = 0;// =  sum of all reputations that voted the same as user, so far (per network)
+        var newTotalAlignedReputation = net.reputationBalance;// = the same as above but including current voting reputation as well
+        _.each(evaluations, function(evaluation) {
+            var agent = _.find(db.agents, 'id', evaluation.agentId);
+            var netStat = _.find(agent.networks, 'id', net.id);
+            if (netStat) {
+                lastTotalVotedReputation += netStat.reputationBalance;
+                if (evaluation.evaluatedValue === evaluatedValue) {
+                    lastTotalAlignedReputation += netStat.reputationBalance;
+                }
+            }
+        });
+        newTotalVotedReputation += lastTotalVotedReputation;
+        newTotalAlignedReputation += lastTotalAlignedReputation;
+        // newUserReputation
+        net.reputationBalance = reputationEvolution(lastUserReputation, lastTotalVotedReputation, newTotalVotedReputation, lastTotalAlignedReputation, newTotalAlignedReputation);
     });
 
     var delta = 0; //calc with reputationStake
@@ -69,10 +80,10 @@ function newEvaluation(contributionId, evaluatorId, evaluatedValue, reputationSt
     updateReputationBalance(evaluators, fee);
 }
 function saveEvaluatorStatsForContribution(evaluatorId, contributionId) {
-    var contribution = getItemById(db.contributions, contributionId);
-    var agent = getItemById(db.agents, evaluatorId);
+    var contribution = _.find(db.contributions, 'id', contributionId);
+    var agent = _.find(db.agents, 'id', evaluatorId);
     _.each(agent.networks, function(net) {
-        var netStats = getItemById(contribution.networks, net.id) || factory.createNetStatsForContribution(net.id);
+        var netStats = _.find(contribution.networks, 'id', net.id) || factory.createNetStatsForContribution(net.id);
         netStats.totalVotedRep += net.reputationBalance;
         netStats.votes.push(evaluatedValue);
         netStats.perVote[evaluatedValue] += 1;
@@ -81,29 +92,10 @@ function saveEvaluatorStatsForContribution(evaluatorId, contributionId) {
         netStats.tokensPaid = 0;
     })
 }
-function getLastTotalVotedReputation(participants) {
-    //(networkId) = fetch evaluations from evaluation db and sum all reputation voted so far (per network)
-}
 function reputationEvolution(lastUserReputation, lastTotalVotedReputation, newTotalVotedReputation, lastTotalAlignedReputation, newTotalAlignedReputation) {
     return (1 - REPUTATION_FRACTION_STAKE)*(lastUserReputation) +
         (REPUTATION_FRACTION_STAKE*lastUserReputation*newTotalAlignedReputation*lastTotalVotedReputation)/
         (lastTotalAlignedReputation*newTotalVotedReputation)
-}
-// should also get networks.networks
-function getParticipantsList(currentEvaluations){
-    var participants = [];
-    var evaluatorsIds = _.pluck(currentEvaluations, "agentId");
-    _.each(evaluatorsIds, function(evaluatorId) {
-        var agent = getItemById(db.agents, evaluatorId);
-        participants.concat(db.agents.networks);
-    });
-    return participants;
-}
-
-function getItemById(collection, id) {
-    return _.find(collection, function(item) {
-        return item.id === id;
-    })
 }
 function fetchUserReputation() {
 
@@ -137,27 +129,26 @@ function getAgentsReputationById(agentId) {
 }
 
 function getParticipants(agentId, networkId) {
-    var agent = getItemById(db.agents, agentId);
-    var network = getItemById(agent.networks, networkId);
+    var agent = _.find(db.agents, 'id', agentId);
+    var network = _.find(agent.networks, 'id', networkId);
     return network;
 }
 
 function getParticipatingNetwork(agentId, networkId) {
-    var agent = getItemById(db.agents, agentId);
-    var network = getItemById(agent.networks, networkId);
-    return network;
+    var agent = _.find(db.agents, 'id', agentId);
+    return _.find(agent.networks, 'id', networkId);
 }
 
 function createContribution(agentId) {
     var instance = factory.createContribution(agentId);
-    var agent = getItemById(db.agents, agentId);
+    var agent = _.find(db.agents, 'id', agentId);
     agent.contributions.push(instance.id);
     db.contributions.push(instance);
     return instance;
 }
 
 function createEvaluation(agentId, contributionId, evaluatedValue) {
-    var contribution = getItemById(db.contributions, contributionId);
+    var contribution = _.find(db.contributions, 'id', contributionId);
     if (!contribution) throw new Error('Contribution Does Not Exist');
     var instance = factory.createEvaluation(agentId, contributionId, evaluatedValue);
     db.evaluations.push(instance);
@@ -166,7 +157,7 @@ function createEvaluation(agentId, contributionId, evaluatedValue) {
 
 function createNetwork(agentId) {
     var instance = factory.createNetwork(agentId);
-    if (_.find(db.networks, function(net) { return net.agentId === instance.agentId}))
+    if (_.find(db.networks, 'agentId', instance.agentId))
     {
         throw new Error('Network Already Exists');
     } else {
@@ -178,8 +169,6 @@ function createNetwork(agentId) {
 
 function existingContribution(agentId) {
     // Better search for an empty contribution array on agent object
-    return _.find(db.contributions, function (item) {
-        return item.agentId == agentId;
-    });
+    return _.find(db.contributions, 'agentId', agentId);
 }
 

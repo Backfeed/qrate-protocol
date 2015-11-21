@@ -43,7 +43,7 @@ describe('protocol function', function () {
             //console.log(protocol.db.contributions);
         });
         it('should update agent contributions array', function () {
-            var agent = protocol.getItemById(protocol.db.agents, agentId);
+            var agent = _.find(protocol.db.agents, 'id', agentId);
             expect(_.includes(agent.contributions, contribution.id)).to.be.true;
             //console.log(protocol.db.agents);
             //console.log(agent.contributions);
